@@ -7,7 +7,7 @@ const question1 =
     type: 'list',
     name: 'Directions',
     message: 'What would you like to do?',
-    choices: ['View all Departments', 'View all Roles', 'View all Employees', 'Add a Department', 'Add a Role', 'Add an Employee', 'Update employee role', 'Update Employee Manager'],
+    choices: ['View all Departments', 'View all Roles', 'View all Employees', 'Add a Department', 'Add a Role', 'Add an Employee', 'Update employee role', 'Update Employee Manager', 'View Managers'],
     default: 'View all Departments'
 }
 // view all departments
@@ -190,8 +190,34 @@ const updateManager = function() {
             if (err) throw err;
             console.table(res);
             init();
-        })
+        });
+    });
+};
+
+const viewManagers = function() {
+    const sql = 'SELECT employee.id, employee.first_name, employee.last_name FROM employee WHERE manager_id IS NULL'
+    db.query(sql, (err, res) => {
+        if (err) throw err;
+        console.table(res);
+        init();
     })
+}
+
+const viewEmployeesByDepartment = function () {
+    inquirer.prompt([{
+        type: 'list',
+        name: 'departmentChoice',
+        message: 'Which departments employees would you like to view?',
+        choices: ['Finance', 'Logistics', 'Engineering']
+    }])/*.then(function(answer) {
+        if(answer.departmentChoice = 'Finance'){
+
+        }
+        if (answer.departmentChoice = 'Logistics') {
+
+        }
+        if (answer.departmentChoice = 'Engineering')
+    })*/
 }
 
 
@@ -243,6 +269,10 @@ const init = function() {
 
             case 'Update Employee Manager':
                 updateManager();
+            break;
+
+            case 'View Managers':
+                viewManagers();
             break;
         }
     })
