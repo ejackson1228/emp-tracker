@@ -7,7 +7,7 @@ const question1 =
     type: 'list',
     name: 'Directions',
     message: 'What would you like to do?',
-    choices: ['View all Departments', 'View all Roles', 'View all Employees', 'Add a Department', 'Add a Role', 'Add an Employee', 'Update employee role'],
+    choices: ['View all Departments', 'View all Roles', 'View all Employees', 'Add a Department', 'Add a Role', 'Add an Employee', 'Update employee role', 'Update Employee Manager'],
     default: 'View all Departments'
 }
 // view all departments
@@ -169,6 +169,31 @@ const updateEmployee = function() {
 })
 }
 
+//update employee manager
+const updateManager = function() {
+    inquirer.prompt([
+        {
+            type: 'number',
+            name: 'employee_id',
+            message: 'What is the ID # of the employee who needs a new manager?'
+        },
+        {
+            type: 'number',
+            name: 'manager_id',
+            message: 'What is the employee ID # of the manager who will manage this employee?'
+        }
+    ]).then( function(answers) {
+        const sql = 'UPDATE employee SET manager_id = ? WHERE id = ?';
+        const params = [answers.manager_id, answers.employee_id];
+
+        db.query(sql, params, (err, res) => {
+            if (err) throw err;
+            console.table(res);
+            init();
+        })
+    })
+}
+
 
 // initialization function
 const init = function() {
@@ -187,7 +212,7 @@ const init = function() {
     inquirer
     .prompt(question1)
     .then( function (question1)  {
-        switch (question1.Directions) {
+        switch (question1.Directions) { //switch based on user command
             case 'View all Departments':
                 viewAllDepartments();
             break;
@@ -214,6 +239,10 @@ const init = function() {
 
             case 'Update employee role':
                 updateEmployee();
+            break;
+
+            case 'Update Employee Manager':
+                updateManager();
             break;
         }
     })
