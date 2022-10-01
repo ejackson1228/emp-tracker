@@ -10,7 +10,7 @@ CREATE TABLE departments (
 );
 
 CREATE TABLE roles (
-    id INTEGER NOT NULL PRIMARY KEY,
+    id INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY,
     title VARCHAR(30) NOT NULL,
     salary DECIMAL,
     department_id INTEGER,
@@ -22,7 +22,7 @@ CREATE TABLE employee (
     first_name VARCHAR(30) NOT NULL,
     last_name VARCHAR(30) NOT NULL,
     role_id INTEGER NOT NULL,
-    manager_id INTEGER,
+    manager_id INTEGER DEFAULT NULL,
     CONSTRAINT fk_role_id FOREIGN KEY (role_id) REFERENCES roles(id),
     CONSTRAINT fk_manager_id FOREIGN KEY (manager_id) REFERENCES employee(id)
 );
