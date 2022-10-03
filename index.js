@@ -7,7 +7,7 @@ const question1 =
     type: 'list',
     name: 'Directions',
     message: 'What would you like to do?',
-    choices: ['View all Departments', 'View all Roles', 'View all Employees', 'Add a Department', 'Add a Role', 'Add an Employee', 'Update employee role', 'Update Employee Manager', 'View Managers'],
+    choices: ['View all Departments', 'View all Roles', 'View all Employees', 'Add a Department', 'Add a Role', 'Add an Employee', 'Update employee role', 'Update Employee Manager', 'View Managers', 'View Employees by Department', 'View Employees By Manager'],
     default: 'View all Departments'
 }
 // view all departments
@@ -194,7 +194,7 @@ const updateManager = function() {
     });
 };
 
-const viewManagers = function() {
+const viewManagers = function() { // view all managers
     const sql = 'SELECT employee.id, employee.first_name, employee.last_name FROM employee WHERE manager_id IS NULL'
     db.query(sql, (err, res) => {
         if (err) throw err;
@@ -203,21 +203,78 @@ const viewManagers = function() {
     })
 }
 
-const viewEmployeesByDepartment = function () {
-    inquirer.prompt([{
-        type: 'list',
+viewEmployeesByDepartment = async () => { // view all employees in a specific department
+    let choices = await getDepartments();
+    console.log(choices);
+    return new Promise((resolve, reject) => {
+    inquirer.prompt([
+        {
+        type: 'list', // if the choices option doesn't work, console log the available departments and have the user type the name in an 'input' parameter
         name: 'departmentChoice',
         message: 'Which departments employees would you like to view?',
-        choices: ['Finance', 'Logistics', 'Engineering']
-    }])/*.then(function(answer) {
-        if(answer.departmentChoice = 'Finance'){
-
+        choices: choices // returns undefined because choices is an object array. how do i extract the values and use them as an array for choices?
         }
-        if (answer.departmentChoice = 'Logistics') {
+    ]).then( function(answer) {
+        resolve();
 
-        }
-        if (answer.departmentChoice = 'Engineering')
-    })*/
+        const sql = 'SELECT employee.id, employee.first_name, employee.last_name, employee.manager_id, employee.role_id, departments.department_name FROM employee JOIN roles ON employee.role_id = roles.id JOIN departments ON roles.department_id = departments.id WHERE departments.department_name = ?';
+        const param = [answer.departmentChoice];
+
+        db.query(sql, param, (err, res) => {
+            if (err) throw err;
+            console.table(res);
+            init();
+        });
+    });
+    });   
+};
+
+getDepartments = () => { // funcction to populate choices in inquirer prompt for viewEmployeesByDepartment (using promises)
+    return new Promise((resolve, reject) => {
+        db.query('SELECT department_name AS name FROM departments', (err, res) => { // for some reason inquirer's choices only reads object values when their key is 'name'?? research this
+            if (err) reject(err);
+            resolve(res);
+        });
+    });
+}
+
+viewEmployeesByManager = async () => {
+    let choices = await getManagers();
+    console.log(choices);
+    return new Promise( (resolve, reject) => {
+        inquirer.prompt([
+            {
+                name: 'manager',
+                type: 'list',
+                message: 'Please select a manager',
+                choices: choices
+            }
+        ]).then(  function(answer) {
+            resolve();
+            console.log(answer.manager)
+            const sql = 'SELECT employee.id, employee.first_name, employee.last_name, employee.role_id FROM employee WHERE manager_id = ?';
+            const param = [answer.manager]
+
+            db.query(sql, param, (err, res) => {
+                if (err) throw err;
+                console.table(res);
+                init();
+            })
+        })
+    });
+}
+
+const getManagers = () => { // function to update inquirer list of choices for 'view employees by manager'
+    return new Promise(( resolve, reject) => {
+        db.query('SELECT employee.id AS name, CONCAT(employee.first_name, " ", employee.last_name) AS manager_name FROM employee WHERE employee.manager_id IS NULL', (err, res) => {
+            if (err) reject(err);
+            resolve(res);
+        });
+    });
+}
+
+const deleteDepartment = function() {
+
 }
 
 
@@ -273,6 +330,14 @@ const init = function() {
 
             case 'View Managers':
                 viewManagers();
+            break;
+
+            case 'View Employees by Department':
+                viewEmployeesByDepartment();
+            break;
+
+            case 'View Employees By Manager':
+                viewEmployeesByManager();
             break;
         }
     })
