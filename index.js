@@ -1,5 +1,5 @@
 const inquirer = require('inquirer');
-const tableIt = require('console.table');
+const table = require('console.table');
 const db = require('./server');
 
 const question1 = 
@@ -204,7 +204,7 @@ const viewManagers = function() { // view all managers
 }
 
 viewEmployeesByDepartment = async () => { // view all employees in a specific department
-    let choices = await getDepartments();
+    let choices = await getDepartments()
     console.log(choices);
     return new Promise((resolve, reject) => {
     inquirer.prompt([
@@ -273,11 +273,6 @@ const getManagers = () => { // function to update inquirer list of choices for '
     });
 }
 
-const deleteDepartment = function() {
-
-}
-
-
 // initialization function
 const init = function() {
     console.log(`
@@ -292,10 +287,9 @@ const init = function() {
     __________________________
     `);
     
-    inquirer
-    .prompt(question1)
-    .then( function (question1)  {
-        switch (question1.Directions) { //switch based on user command
+    inquirer.prompt(question1)
+    .then( function(answer) {
+        switch (answer.Directions) { //switch based on use command
             case 'View all Departments':
                 viewAllDepartments();
             break;
